@@ -1,21 +1,6 @@
 var pull = require('pull-stream')
 var Next = require('pull-next')
-
-function get (obj, path) {
-  if(!obj) return undefined
-  if('string' === typeof path) return obj[path]
-  if(Array.isArray(path)) {
-    for(var i = 0; obj && i < path.length; i++)
-      obj = obj[path[i]]
-    return obj
-  }
-}
-
-function clone (obj) {
-  var _obj = {}
-  for(var k in obj) _obj[k] = obj[k]
-  return _obj
-}
+var nested = require('libnested')
 
 module.exports = function (createStream, opts, property, range) {
 
@@ -26,12 +11,12 @@ module.exports = function (createStream, opts, property, range) {
   return Next(function () {
     if(last) {
       if(count === 0) return
-      var value = opts[range] = get(last, property)
+      var value = nested.set(opts, range, nested.get(last, property))
       if(value == null) return
       last = null
     }
     return pull(
-      createStream(clone(opts)),
+      createStream(nested.clone(opts)),
       pull.through(function (msg) {
         count ++
         if(!msg.sync) {
@@ -46,4 +31,6 @@ module.exports = function (createStream, opts, property, range) {
     )
   })
 }
+
+
 
