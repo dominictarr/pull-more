@@ -6,7 +6,7 @@ module.exports = function (createStream, opts, property, range) {
 
   range = range || (opts.reverse ? 'lt' : 'gt')
   property = property || 'timestamp'
-
+  opts = nested.clone(opts)
   var last = null, count = -1
   return Next(function () {
     if(last) {
@@ -15,6 +15,7 @@ module.exports = function (createStream, opts, property, range) {
       if(value == null) return
       last = null
     }
+
     return pull(
       createStream(nested.clone(opts)),
       pull.through(function (msg) {
@@ -31,6 +32,9 @@ module.exports = function (createStream, opts, property, range) {
     )
   })
 }
+
+
+
 
 
 
